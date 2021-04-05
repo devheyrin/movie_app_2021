@@ -1,41 +1,54 @@
 import React from "react";
-import PropTypes from "prop-types";
+import axios from "axios";
+import Movies from "./Movies";
+import "./App.css";
 
+class App extends React.Component {
+    state = {
+        isLoading: true,
+        movies: []
+    };
 
-class App extends React.Component{
+    getMovies = async () => {
+        const {
+            data: {
+                data: {
+                    movies
+                }
+            }
+        } = await axios.get("https://yts-proxy.now.sh/list_movies.json?sort_by=rating");
+        this.setState({movies, isLoading: false})
+    };
 
-  state = {
-    count: 0
-  };
+    componentDidMount() {
+        this.getMovies();
+    }
 
-  add = () => {
-    this.setState(current => ({count: current.count + 1}));
-  };
-
-  minus = () => {
-    this.setState(current => ({count: current.count - 1}));
-  };
-
-  componentDidMount(){
-    console.log("Component Rendered")
-  }
-  componentDidUpdate(){
-    console.log("Component Updated")
-  }
-  componentWillUnmount(){
-    console.log("Goodbye Cruel world")
-  }
-
-
-  render(){
-    console.log("I'm rendering")
-    return (<div>
-      <h1>The number is: {this.state.count}</h1>
-      <button onClick={this.add}>Add</button>
-      <button onClick={this.minus}>Minus</button>
-    </div>
-    );
-  }
+    render() {
+        const {isLoading, movies} = this.state;
+        return <section className="container">
+            {
+                isLoading
+                    ? <div className="loader">
+                            <span className="loader_text">Loading...</span>
+                        </div>
+                    : <div className="movies">
+                            {
+                                movies.map(movie => {
+                                    return <Movies
+                                        key={movie.id}
+                                        id={movie.id}
+                                        year={movie.year}
+                                        title={movie.title}
+                                        summary={movie.summary}
+                                        poster={movie.medium_cover_image}
+                                        genres={movie.genres} />
+                                })
+                            }
+                        </div>
+            }
+        </section>
+    }
 }
 
 export default App;
